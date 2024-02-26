@@ -1,6 +1,8 @@
 const crypto =  require('crypto');
 const axios = require('axios');
-const {salt_key, merchant_id} = require('./secret')
+// const {salt_key, merchant_id} = require('./secret')
+const salt_key="" //write your salt key
+const merchant_id="" //write your salt key
 
 const newPayment = async (req, res) => {
     try {
@@ -10,7 +12,7 @@ const newPayment = async (req, res) => {
             merchantTransactionId: merchantTransactionId,
             merchantUserId: req.body.MUID,
             name: req.body.name,
-            amount: req.body.amount * 100,
+            amount: req.body.amount *100 ,
             redirectUrl: `http://localhost:5000/api/status/${merchantTransactionId}`,
             redirectMode: 'POST',
             mobileNumber: req.body.number,
@@ -40,8 +42,8 @@ const newPayment = async (req, res) => {
         };
 
         axios.request(options).then(function (response) {
-            console.log(response.data)
-            return res.redirect(response.data.data.instrumentResponse.redirectInfo.url)
+            res.send(response.data)
+            // return res.redirect(response.data.data.instrumentResponse.redirectInfo.url)
         })
         .catch(function (error) {
             console.error(error);
@@ -56,8 +58,8 @@ const newPayment = async (req, res) => {
 }
 
 const checkStatus = async(req, res) => {
-    const merchantTransactionId = res.req.body.transactionId
-    const merchantId = res.req.body.merchantId
+    const merchantTransactionId = req.body.transactionId
+    const merchantId = ''
 
     const keyIndex = 1;
     const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + salt_key;
@@ -79,7 +81,7 @@ const checkStatus = async(req, res) => {
     axios.request(options).then(async(response) => {
         if (response.data.success === true) {
             const url = `http://localhost:3000/success`
-            return res.redirect(url)
+            res.status(200).json({data :response})
         } else {
             const url = `http://localhost:3000/failure`
             return res.redirect(url)
